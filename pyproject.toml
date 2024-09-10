@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "git-vector"
+version = "0.1.0-rc1"
+description = "Prompt OpenAI models with git repository context"
+authors = ["Markus Blomqvist <blomqvist_markus@hotmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.scripts]
+git-vector = "git_vector.git_vector:main"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+openai = "^1.47.1"
+gitpython = "^3.1.43"
+numpy = "^2.1.1"
+scikit-learn = "^1.5.2"
+click = "^8.1.7"
+python-dotenv = "^1.0.1"
+tqdm = "^4.66.5"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+isort = "^5.13.2"
+flake8 = "^7.1.1"
+pre-commit = "^3.8.0"
+pytest = "^8.3.3"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
+mypy = "^1.11.2"
+pandas-stubs = "^2.2.3"
+types-Pygments = "^2.18.0"
+types-tqdm = "^4.66.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | env
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+skip = [".venv", "venv", "env", "__pycache__", ".git", "build", "dist"]

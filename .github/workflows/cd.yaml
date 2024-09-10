@@ -1,0 +1,73 @@
+name: "CD"
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Target branch for release"
+        required: true
+        default: "main"
+      release-type:
+        description: "Type of release?"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    name: "Release"
+    if: github.event.inputs.branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - uses: Gr1N/setup-poetry@v8
+        with:
+          poetry-version: "1.2.2"
+
+      - name: "Bump `git_vector.__version__`"
+        run: sed -i 's/^__version__ *=.*/__version__ = "${{ steps.bump.outputs.version }}"/' git_vector/__init__.py
+
+      - name: "Update the changelog"
+        # Find the first line that starts with `###` or `## [<number>` from the CHANGELOG and insert the new version header before it.
+        run: sed -i "0,/^\(###\|## *\[[0-9]\).*/{s//## [${{ steps.bump.outputs.version }}] - $(date -u '+%Y-%m-%d')\n\n&/}" CHANGELOG.md
+
+      - name: "Extract version's changelog for release notes"
+        # 1. Find the lines between the first `## [<number>` and the second `## [<number>`.
+        # 2. Remove all leading and trailing newlines from the output.
+        run: sed '1,/^## *\[[0-9]/d;/^## *\[[0-9]/Q' CHANGELOG.md | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' > release_notes.txt
+
+      - name: "Commit and tag the changes"
+        run: |
+          git config user.name 'github-actions'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pyproject.toml git_vector/__init__.py CHANGELOG.md
+          git commit --message='Release ${{ steps.bump.outputs.version }}'
+          git tag --annotate --message='' v${{ steps.bump.outputs.version }}
+
+      - name: "Build the wheel"
+        run: poetry build
+
+      - name: "Publish to PyPI"
+        run: poetry publish
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+
+      - name: "Push the changes"
+        run: git push --follow-tags
+
+      - name: "Create a GitHub release"
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5 # v1
+        with:
+          tag_name: v${{ steps.bump.outputs.version }}
+          name: v${{ steps.bump.outputs.version }}
+          body_path: release_notes.txt
