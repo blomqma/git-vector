@@ -46,7 +46,7 @@ pip install git-vector
    git-vector --repo-dir /path/to/your/git/repository
    ```
 
-   This will start the intera`tive CLI for the user to chat with the codebase.
+   This will start the interactive CLI for the user to chat with the codebase.
 
 ## Configuration
 
@@ -68,5 +68,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 - [OpenAI](https://openai.com) for providing the API that powers this tool.
 - [GitPython](https://gitpython.readthedocs.io/en/stable/) for interacting with Git repositories.
-- [NumPy](https://numpy.org/) and [scikit-learn](https://scikit-learn.org/) for numerical and machine learning
-  2024-09-25 00:12:15,639 [INFO] Response provided to the user.
+- [NumPy](https://numpy.org/) and [scikit-learn](https://scikit-learn.org/) for numerical and machine learning.
